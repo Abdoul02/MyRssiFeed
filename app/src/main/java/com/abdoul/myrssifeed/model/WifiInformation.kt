@@ -1,12 +1,15 @@
 package com.abdoul.myrssifeed.model
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.android.parcel.Parcelize
 
-data class WifiInformation (
+@Parcelize
+data class WifiInformation(
     @SerializedName("bssid")
-    val bssid : String,
+    val bssid: String,
     @SerializedName("ssid")
-    val ssid : String,
+    val ssid: String,
     @SerializedName("level")
-    val level : Int
-)
+    val level: Int
+) : Parcelable

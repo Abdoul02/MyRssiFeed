@@ -1,9 +1,11 @@
 package com.abdoul.myrssifeed.other
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.location.LocationManager
 import android.os.Build
+import android.provider.Settings
 import android.view.View
 import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
@@ -46,9 +48,19 @@ class AppUtility @Inject constructor(@ApplicationContext private val context: Co
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
     }
 
+    @SuppressLint("HardwareIds")
+    fun getDeviceId() : String{
+       return Settings.Secure.getString(
+            context.contentResolver,
+            Settings.Secure.ANDROID_ID
+        )
+    }
+
     companion object {
         const val REQUEST_CODE_LOCATION_PERMISSION = 0
         const val WORKER_TAG = "MyWorker"
-        const val CHANNEL_ID = "log_alert";
+        const val CHANNEL_ID = "log_alert"
+        const val EXTRA_KEY = "deviceInfo"
+        const val NOTIFICATION_ID = 100
     }
 }

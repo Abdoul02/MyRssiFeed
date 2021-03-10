@@ -17,6 +17,7 @@ import com.abdoul.myrssifeed.databinding.ActivityMainBinding
 import com.abdoul.myrssifeed.model.DeviceInfo
 import com.abdoul.myrssifeed.model.WifiInformation
 import com.abdoul.myrssifeed.other.AppUtility
+import com.abdoul.myrssifeed.other.AppUtility.Companion.EXTRA_KEY
 import com.abdoul.myrssifeed.other.AppUtility.Companion.WORKER_TAG
 import com.abdoul.myrssifeed.service.WifiLogWorker
 import com.google.gson.GsonBuilder
@@ -54,6 +55,18 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
         binding.btnUploadLog.setOnClickListener {
             uploadRssiLog()
+        }
+        onNewIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        val extra = intent?.extras
+        extra?.let {
+            if (it.containsKey(EXTRA_KEY)) {
+                val deviceInfo = it.get(EXTRA_KEY) as DeviceInfo
+                showResponse(deviceInfo)
+            }
         }
     }
 
@@ -119,10 +132,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
                 wifiInfoList.add(wifiInfo)
                 infoList.add(map)
             }
-            val deviceId = Settings.Secure.getString(
-                applicationContext.contentResolver,
-                Settings.Secure.ANDROID_ID
-            )
+            val deviceId = appUtility.getDeviceId()
             mainViewModel.uploadWifiInfo(DeviceInfo(deviceId, wifiInfoList.toList()))
         }
     }

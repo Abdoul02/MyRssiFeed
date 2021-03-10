@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.wifi.WifiManager
 import android.os.Build
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
@@ -17,16 +16,14 @@ import com.abdoul.myrssifeed.model.DeviceInfo
 import com.abdoul.myrssifeed.model.WifiInformation
 import com.abdoul.myrssifeed.other.AppUtility
 import com.abdoul.myrssifeed.other.AppUtility.Companion.CHANNEL_ID
+import com.abdoul.myrssifeed.other.AppUtility.Companion.EXTRA_KEY
+import com.abdoul.myrssifeed.other.AppUtility.Companion.NOTIFICATION_ID
 import com.abdoul.myrssifeed.repository.RssiRepository
 import com.abdoul.myrssifeed.ui.MainActivity
-import com.google.gson.GsonBuilder
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.*
-import kotlin.collections.HashMap
 
 @HiltWorker
 class WifiLogWorker @AssistedInject constructor(
@@ -62,27 +59,19 @@ class WifiLogWorker @AssistedInject constructor(
                 wifiInfoList.add(wifiInfo)
                 infoList.add(map)
             }
-
-            val gson = GsonBuilder().create()
-            uploadAndNotify(DeviceInfo("Test", wifiInfoList.toList()))
+            val deviceId = appUtility.getDeviceId()
+            uploadAndNotify(DeviceInfo(deviceId, wifiInfoList.toList()))
         }
     }
 
     private suspend fun uploadAndNotify(deviceInfo: DeviceInfo) {
-        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        val currentDateTime = sdf.format(Date())
-
         withContext(Dispatchers.IO) {
             repository.uploadWifiInfo(deviceInfo)
                 .collect {
                     if (it.getOrNull() != null) {
-                        //notify
                         showNotification(appContext, it.getOrNull())
-                        Log.d("NetworkTest", "After: ${it.getOrNull()}")
                     } else {
-                        //error
                         showNotification(appContext, null, true)
-                        Log.e("NetworkTest", "error")
                     }
                 }
         }
@@ -96,10 +85,10 @@ class WifiLogWorker @AssistedInject constructor(
 
         createNotificationChannel()
         val notificationIntent = Intent(context, MainActivity::class.java)
-        notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-        val intent = Intent(context, MainActivity::class.java)
+        notificationIntent.putExtra(EXTRA_KEY, deviceInfo)
+        notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
         val pendingIntent =
-            PendingIntent.getActivity(appContext, 0, intent, 0);
+            PendingIntent.getActivity(appContext, NOTIFICATION_ID, notificationIntent, 0);
         val builder = NotificationCompat.Builder(
             context,
             CHANNEL_ID
@@ -112,7 +101,7 @@ class WifiLogWorker @AssistedInject constructor(
             .build()
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(100, notification)
+        notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
     private fun createNotificationChannel() {
