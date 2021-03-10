@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">My RssiFeed</string>
+    <string name="all_permission_required">You need to accept all permissions to use this app</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
+    <string name="background_location_permission_title">Background Location</string>
+    <string name="background_location_permission_message">Please note you need go to permissions and select location and chose Allow all the time for the app to send background location</string>
+    <string name="notification_error">Some error occurred while logging wifi info</string>
+    <string name="upload_wifi_info">Upload wifi info</string>
+    <string name="title_message">The app will periodically send wifi logs, you can click on button below to send at anytime</string>
+    <string name="generic_error">Something went wrong</string>
+    <string name="turn_on_location">Please turn on location</string>
+</resources>
