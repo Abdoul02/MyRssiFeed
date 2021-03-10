@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
-import java.lang.RuntimeException
 
 @ExperimentalCoroutinesApi
 class MainViewModelTest : BaseUnitTest() {
@@ -33,9 +32,9 @@ class MainViewModelTest : BaseUnitTest() {
         runBlockingTest {
             val viewModel = mockNetworkResponse()
 
-            viewModel.uploadWifiInfo(deviceInfo)
+            viewModel.uploadWifiInfo()
 
-            verify(repository, times(1)).uploadWifiInfo(deviceInfo)
+            verify(repository, times(1)).uploadWifiInfo()
         }
 
     @Test
@@ -43,7 +42,7 @@ class MainViewModelTest : BaseUnitTest() {
         runBlockingTest {
             val viewModel = mockNetworkResponse()
 
-            viewModel.uploadWifiInfo(deviceInfo)
+            viewModel.uploadWifiInfo()
             viewModel.wifiInfoState.first()
 
             assertEquals(deviceInfoViewAction, viewModel.wifiInfoState.first())
@@ -54,13 +53,13 @@ class MainViewModelTest : BaseUnitTest() {
         runBlockingTest {
             val viewModel = mockNetworkResponse(false)
 
-            viewModel.uploadWifiInfo(deviceInfo)
+            viewModel.uploadWifiInfo()
 
             assertEquals(deviceInfoErrorViewAction, viewModel.wifiInfoState.first())
         }
 
     private suspend fun mockNetworkResponse(success: Boolean = true): MainViewModel {
-        whenever(repository.uploadWifiInfo(deviceInfo)).thenReturn(
+        whenever(repository.uploadWifiInfo()).thenReturn(
             flow {
                 if (success)
                     emit(Result.success(deviceInfo))

@@ -18,10 +18,10 @@ class MainViewModel @Inject constructor(private val repository: RssiRepository) 
     private val _wifiInfoState = MutableStateFlow<ViewAction>(ViewAction.Empty)
     val wifiInfoState: StateFlow<ViewAction> = _wifiInfoState
 
-    fun uploadWifiInfo(deviceInfo: DeviceInfo) {
+    fun uploadWifiInfo() {
         _wifiInfoState.value = ViewAction.Loading(true)
         viewModelScope.launch {
-            repository.uploadWifiInfo(deviceInfo)
+            repository.uploadWifiInfo()
                 .onEach {
                     _wifiInfoState.value = ViewAction.Loading(false)
                 }.collect {

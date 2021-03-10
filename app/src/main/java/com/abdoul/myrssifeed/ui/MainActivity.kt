@@ -1,10 +1,7 @@
 package com.abdoul.myrssifeed.ui
 
 import android.Manifest
-import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
-import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.viewModels
@@ -15,7 +12,6 @@ import androidx.work.*
 import com.abdoul.myrssifeed.R
 import com.abdoul.myrssifeed.databinding.ActivityMainBinding
 import com.abdoul.myrssifeed.model.DeviceInfo
-import com.abdoul.myrssifeed.model.WifiInformation
 import com.abdoul.myrssifeed.other.AppUtility
 import com.abdoul.myrssifeed.other.AppUtility.Companion.EXTRA_KEY
 import com.abdoul.myrssifeed.other.AppUtility.Companion.WORKER_TAG
@@ -108,32 +104,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
                 val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                 startActivity(intent)
             } else {
-                sendWifiData()
+                mainViewModel.uploadWifiInfo()
             }
-        }
-    }
-
-    @SuppressLint("HardwareIds")
-    private fun sendWifiData() {
-        val wifiManager =
-            this.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager?
-        wifiManager?.let {
-            val wifiList = it.scanResults
-            val infoList = arrayListOf<HashMap<String, String>>()
-            val wifiInfoList = mutableListOf<WifiInformation>()
-
-            for (scanResult in wifiList) {
-                val map = HashMap<String, String>()
-                val level = WifiManager.calculateSignalLevel(scanResult.level, 5)
-                map["bssid"] = scanResult.BSSID
-                map["ssid"] = scanResult.SSID
-                map["level"] = level.toString()
-                val wifiInfo = WifiInformation(scanResult.BSSID, scanResult.SSID, level)
-                wifiInfoList.add(wifiInfo)
-                infoList.add(map)
-            }
-            val deviceId = appUtility.getDeviceId()
-            mainViewModel.uploadWifiInfo(DeviceInfo(deviceId, wifiInfoList.toList()))
         }
     }
 

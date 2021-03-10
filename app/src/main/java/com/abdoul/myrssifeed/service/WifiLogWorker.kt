@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.net.wifi.WifiManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.hilt.work.HiltWorker
@@ -13,7 +12,6 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.abdoul.myrssifeed.R
 import com.abdoul.myrssifeed.model.DeviceInfo
-import com.abdoul.myrssifeed.model.WifiInformation
 import com.abdoul.myrssifeed.other.AppUtility
 import com.abdoul.myrssifeed.other.AppUtility.Companion.CHANNEL_ID
 import com.abdoul.myrssifeed.other.AppUtility.Companion.EXTRA_KEY
@@ -35,38 +33,15 @@ class WifiLogWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         if (appUtility.hasLocationPermission(appContext) && appUtility.isLocationEnabled()) {
-            sendWifiInfo()
+            uploadAndNotify()
             return Result.success()
         }
         return Result.failure()
     }
 
-    private suspend fun sendWifiInfo() {
-        val wifiManager =
-            appContext.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager?
-        wifiManager?.let {
-            val wifiList = it.scanResults
-            val infoList = arrayListOf<HashMap<String, String>>()
-            val wifiInfoList = mutableListOf<WifiInformation>()
-
-            for (scanResult in wifiList) {
-                val map = HashMap<String, String>()
-                val level = WifiManager.calculateSignalLevel(scanResult.level, 5)
-                map["bssid"] = scanResult.BSSID
-                map["ssid"] = scanResult.SSID
-                map["level"] = level.toString()
-                val wifiInfo = WifiInformation(scanResult.BSSID, scanResult.SSID, level)
-                wifiInfoList.add(wifiInfo)
-                infoList.add(map)
-            }
-            val deviceId = appUtility.getDeviceId()
-            uploadAndNotify(DeviceInfo(deviceId, wifiInfoList.toList()))
-        }
-    }
-
-    private suspend fun uploadAndNotify(deviceInfo: DeviceInfo) {
+    private suspend fun uploadAndNotify() {
         withContext(Dispatchers.IO) {
-            repository.uploadWifiInfo(deviceInfo)
+            repository.uploadWifiInfo()
                 .collect {
                     if (it.getOrNull() != null) {
                         showNotification(appContext, it.getOrNull())
