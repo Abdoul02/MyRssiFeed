@@ -60,8 +60,10 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         val extra = intent?.extras
         extra?.let {
             if (it.containsKey(EXTRA_KEY)) {
-                val deviceInfo = it.get(EXTRA_KEY) as DeviceInfo
-                showResponse(deviceInfo)
+                val deviceInfo = it.get(EXTRA_KEY) as? DeviceInfo
+                deviceInfo?.let { deviceData ->
+                    showResponse(deviceData)
+                }
             }
         }
     }
